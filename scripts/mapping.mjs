@@ -44,11 +44,9 @@ export function mapColors(g, opts = {}) {
   const accentText = g('--button-text-color') || '#ffffff';
   const accentHover = g('--button-hover-background');
   const link = g('--link-button-color');
-  // Diff.
+  // Diff. Desktop uses a single flat row background with no word-level fill.
   const diffAddLine = g('--diff-add-background-color');
-  const diffAddWord = g('--diff-add-inner-background-color') || diffAddLine;
   const diffDelLine = g('--diff-delete-background-color');
-  const diffDelWord = g('--diff-delete-inner-background-color') || diffDelLine;
   const diffHunk = g('--diff-hunk-background-color');
   const ok = g('--status-success-color'); // green
   const danger = g('--pr-changes-requested-icon-background-color') || g('--md-danger-fg-color');
@@ -174,10 +172,13 @@ export function mapColors(g, opts = {}) {
   set('scrollbarSlider.hoverBackground', g('--scroll-bar-thumb-hover-color') || `${overlay(fgSecondary, 0.3)}`);
 
   // --- Diff ---
-  set('diffEditor.insertedLineBackground', overlay(diffAddLine, 0.65));
-  set('diffEditor.insertedTextBackground', overlay(diffAddWord, 0.55));
-  set('diffEditor.removedLineBackground', overlay(diffDelLine, 0.65));
-  set('diffEditor.removedTextBackground', overlay(diffDelWord, 0.55));
+  // Like GitHub Desktop: one flat row background, no word-level highlight.
+  // The line colors are Desktop's own opaque backgrounds; the *Text* tokens are
+  // forced transparent to suppress the official theme's word-level fill.
+  set('diffEditor.insertedLineBackground', diffAddLine);
+  set('diffEditor.removedLineBackground', diffDelLine);
+  set('diffEditor.insertedTextBackground', '#00000000');
+  set('diffEditor.removedTextBackground', '#00000000');
   set('editorGutter.addedBackground', ok);
   set('editorGutter.deletedBackground', danger);
   set('editorGutter.modifiedBackground', link);
