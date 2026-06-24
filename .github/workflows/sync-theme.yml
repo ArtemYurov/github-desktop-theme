@@ -1,0 +1,100 @@
+name: Sync theme from GitHub Desktop
+
+# Periodically pulls desktop/desktop sources, regenerates the themes and — if the
+# colors changed — commits them, builds the .vsix and publishes a GitHub Release.
+# The color source is the repo SCSS (SOURCE=repo); the app is not needed in CI.
+
+on:
+  workflow_dispatch: # manual run (Actions tab → Run workflow)
+    inputs:
+      desktop_ref:
+        description: 'desktop/desktop branch or tag'
+        required: false
+        default: 'development'
+  schedule:
+    # cron has no "every two weeks", so we use the 1st and 15th of the month
+    # (~every two weeks). For "once a month" keep only '0 6 1 * *'.
+    - cron: '0 6 1,15 * *' # 1st and 15th at 06:00 UTC
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - 'vendor/**'
+      - '.github/workflows/sync-theme.yml'
+
+permissions:
+  contents: write # required for git push and creating a Release
+
+concurrency:
+  group: sync-theme
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clone desktop/desktop
+        run: |
+          REF="${{ github.event.inputs.desktop_ref || 'development' }}"
+          git clone --depth 1 --branch "$REF" https://github.com/desktop/desktop.git _desktop
+          echo "DESKTOP_SHA=$(git -C _desktop rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - name: Generate themes
+        env:
+          SOURCE: repo
+          DESKTOP_REPO: ${{ github.workspace }}/_desktop
+        run: npm run generate
+
+      # Detect whether the themes changed. The result goes into the `changed`
+      # output, which gates every following step (commit, build, release).
+      - name: Detect changes
+        id: diff
+        run: |
+          if [ -z "$(git status --porcelain themes/)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Themes unchanged — no release needed."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit themes
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add themes/
+          git commit -m "chore: update theme from desktop@${DESKTOP_SHA} [skip ci]"
+          git push
+
+      # The package version is made unique by the run number (semver-compatible).
+      # package.json in the repo is left unchanged — the bump is only for the .vsix.
+      - name: Package VSIX
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          VERSION="0.1.${{ github.run_number }}"
+          npm version "$VERSION" --no-git-tag-version
+          npx --yes @vscode/vsce@latest package --no-dependencies \
+            -o "github-desktop-theme-${VERSION}.vsix"
+          echo "VSIX_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${VSIX_VERSION}" \
+            "github-desktop-theme-${VSIX_VERSION}.vsix" \
+            --title "v${VSIX_VERSION} (desktop@${DESKTOP_SHA})" \
+            --notes "Automated build from desktop/desktop@${DESKTOP_SHA}. Download the .vsix and install in VS Code: Extensions → ⋯ → Install from VSIX."

@@ -1,0 +1,38 @@
+{
+  "name": "github-desktop-theme",
+  "displayName": "GitHub Desktop Theme",
+  "description": "A VS Code theme that matches the GitHub Desktop window. Colors are taken directly from the installed app.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "GitHub Desktop Light",
+        "uiTheme": "vs",
+        "path": "./themes/github-desktop-light.json"
+      },
+      {
+        "label": "GitHub Desktop Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/github-desktop-dark.json"
+      }
+    ]
+  },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "generate:repo": "SOURCE=repo node scripts/generate.mjs",
+    "package": "npx --yes @vscode/vsce@latest package --no-dependencies -o github-desktop-theme.vsix"
+  },
+  "devDependencies": {
+    "primer-support": "^5.0.0",
+    "sass": "^1.27.0"
+  }
+}

@@ -1,0 +1,10 @@
+# What NOT to include in the .vsix (the installable theme package).
+# The package only needs the manifest, the themes themselves and the docs.
+.github/**
+scripts/**
+vendor/**
+node_modules/**
+.gitignore
+package-lock.json
+*.vsix
+.DS_Store

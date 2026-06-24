@@ -1,0 +1,2 @@
+github.github-vscode-theme v6.3.5
+Source of the base tokenColors filler layer (MIT). Update when the extension is updated.

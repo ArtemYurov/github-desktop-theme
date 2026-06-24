@@ -1,0 +1,5 @@
+node_modules/
+*.vsix
+.DS_Store
+# desktop/desktop clone, created by CI/locally for SOURCE=repo
+_desktop/
