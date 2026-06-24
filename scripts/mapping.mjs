@@ -182,12 +182,10 @@ export function mapColors(g, opts = {}) {
   set('editorGutter.deletedBackground', danger);
   set('editorGutter.modifiedBackground', link);
 
-  // --- Git decorations in the file tree ---
-  set('gitDecoration.addedResourceForeground', ok);
-  set('gitDecoration.untrackedResourceForeground', ok);
-  set('gitDecoration.modifiedResourceForeground', g('--diff-hunk-gutter-color') || link);
-  set('gitDecoration.deletedResourceForeground', danger);
-  set('gitDecoration.conflictingResourceForeground', g('--banner-warning-link-color'));
+  // Git decorations (file-tree status colors) are intentionally NOT mapped:
+  // Desktop shows status via icons, not name color, so it has no good source
+  // color. The official theme's values (modified/added/deleted/...) are correct
+  // and readable, so we keep them from the filler layer.
 
   // --- Badges / notifications ---
   set('badge.background', accent);
