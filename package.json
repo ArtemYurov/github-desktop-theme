@@ -3,7 +3,7 @@
   "displayName": "GitHub Desktop Theme",
   "description": "A VS Code theme that matches the GitHub Desktop window. Colors are taken directly from the installed app.",
   "version": "0.1.0",
-  "publisher": "local",
+  "publisher": "artemyurov",
   "private": true,
   "license": "MIT",
   "engines": {
@@ -34,5 +34,19 @@
   "devDependencies": {
     "primer-support": "^5.0.0",
     "sass": "^1.27.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArtemYurov/github-desktop-theme.git"
+  },
+  "homepage": "https://github.com/ArtemYurov/github-desktop-theme#readme",
+  "bugs": {
+    "url": "https://github.com/ArtemYurov/github-desktop-theme/issues"
+  },
+  "keywords": [
+    "theme",
+    "github",
+    "github-desktop",
+    "color-theme"
+  ]
 }
